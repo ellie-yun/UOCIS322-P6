@@ -8,6 +8,7 @@ class Mongodb:
         self.client_name = client_name
         self.client = None
         self.db = None
+        self.collection = None
 
     def connect(self):
         self.client = MongoClient('mongodb://' + self.client_name, 27017)
@@ -15,13 +16,16 @@ class Mongodb:
     def set_db(self, db_name):
         self.db = self.client[db_name]
 
-    def insert(self, collection, row):
-        self.db[collection].insert_one(row)
+    def set_collection(self, collection_name):
+        self.collection = self.db[collection_name]
 
-    def delete_all_rows(self, collection):
-        self.db[collection].delete_many({})
+    def insert(self, row):
+        self.collection.insert_one(row)
 
-    def list_all_rows(self, collection):
-        return list(self.db[collection].find())
+    def delete_all_rows(self):
+        self.collection.delete_many({})
+
+    def list_all_rows(self):
+        return list(self.collection.find())
 
 
