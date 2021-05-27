@@ -11,16 +11,12 @@ from flask import request
 import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
 import db # Database operations
-import config
 
-import logging
 
 ###
 # Globals
 ###
 app = flask.Flask(__name__)
-api = Api(app)
-CONFIG = config.configuration()
 
 db_client = db.Mongodb(os.environ['MONGODB_HOSTNAME'])
 db_client.connect()
@@ -102,11 +98,5 @@ def _calc_times():
 
 #############
 
-
-app.debug = CONFIG.DEBUG
-if app.debug:
-    app.logger.setLevel(logging.DEBUG)
-
 if __name__ == "__main__":
-    print("Opening for global access on port {}".format(CONFIG.PORT))
-    app.run(port=CONFIG.PORT, host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True)
