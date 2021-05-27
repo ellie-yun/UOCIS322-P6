@@ -19,11 +19,13 @@ import logging
 # Globals
 ###
 app = flask.Flask(__name__)
+api = Api(app)
 CONFIG = config.configuration()
 
 db_client = db.Mongodb(os.environ['MONGODB_HOSTNAME'])
 db_client.connect()
 db_client.set_db("brevetsdb")
+db_client.set_collection("latestsubmit")
 
 ###
 # Pages
@@ -44,18 +46,17 @@ def submit():
     data['table'] = eval(data['table'])
     table = data['table']
     # Remove the previous submit result
-    db_client.delete_all_rows("latestsubmit")
+    db_client.delete_all_rows()
 
     for i in range(len(table)):
         row = table[str(i)]
-        db_client.insert("latestsubmit", row)
+        db_client.insert(row)
     return flask.jsonify(output=str(data))
 
 
 @app.route("/display")
 def display():
-    retrieval = db_client.list_all_rows("latestsubmit")
-    app.logger.debug(retrieval)
+    retrieval = db_client.list_all_rows()
     brevet = begin_date = ""
     if len(retrieval) > 0:
         brevet = retrieval[0]['brevet']
@@ -100,6 +101,7 @@ def _calc_times():
 
 
 #############
+
 
 app.debug = CONFIG.DEBUG
 if app.debug:
