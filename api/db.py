@@ -19,12 +19,6 @@ class Mongodb:
     def set_collection(self, collection_name):
         self.collection = self.db[collection_name]
 
-    def insert(self, row):
-        self.collection.insert_one(row)
-
-    def delete_all_rows(self):
-        self.collection.delete_many({})
-
     def list_all_rows(self):
         return list(self.collection.find())
 
@@ -32,10 +26,17 @@ class Mongodb:
         fields_dict = {}
         for f in fields:
             fields_dict[f] = 1
+        fields_dict["_id"] = 0
 
         rows = []
         for row in self.collection.find({}, fields_dict):
             rows.append(row)
         return rows
 
+    def find_top_k(self, fields, k):
+        fields_dict = {}
+        for f in fields:
+            fields_dict[f] = 1
+        fields_dict["_id"] = 0
 
+        return list(self.collection.find({}, fields_dict).sort("km").limit(k))
