@@ -46,6 +46,9 @@ def submit():
 
     for i in range(len(table)):
         row = table[str(i)]
+        for key, value in row.items():
+            if key == "km":
+                row[key] = int(value)
         db_client.insert(row)
     return flask.jsonify(output=str(data))
 
