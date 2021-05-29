@@ -26,27 +26,37 @@
         <script src="{{ url_for('static', filename='js/moment.min.js') }}"></script>
         <style>
             .button {
-                border: 2px solid coral;
-                background-color: coral;
+                color: seagreen;
+                border: 2px solid seagreen;
                 border-radius: 5px;
                 height: 30px;
             }
             .option_format {
                 font-weight: bold;
                 margin-left: 15px;
-                margin-bottom: 0px;
+                margin-top: 5px;
             }
-            .result {
+            .display {
+                margin-bottom: 10px;
                 margin-left: 15px;
-                color: coral;
+                color: darkcyan;
+            }
+            .frame {
+                margin-top: 20px;
+                color: seagreen;
+                border-radius: 20px;
+                border: 2px solid seagreen;
+                padding: 20px;
+                width: 530px;
+                height: 100px;
             }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>ACP Control Times Display</h1>
-            <p style="color:red; font-size:18px; font-weight:bold; margin-top:25px; margin-bottom:20px">
-                Click one of the followings to view the latest submission of the control times!</br>
+            <h1 class="frame">ACP Control Times Display</h1>
+            <p style="color:seagreen; font-size:18px; font-weight:bold; margin-top:25px; margin-bottom:20px">
+                Select the option and/or fill in the textbox for one of the followings to view the latest submission of the control times!</br>
             </p>
             <form style="margin-bottom:10px;">
                 Display all the open and close times in
@@ -60,7 +70,7 @@
                 format.
                 <button type="button" class="button" onclick="retrieve('1')">Submit</button>
             </form>
-            <p class="result" id="result1"></p>
+            <pre class="display" id="display1"><code></code></pre>
             <form style="margin-bottom:10px;">
                 Display only the open times in
                 <select name="datatype2" id="datatype2" required>
@@ -73,7 +83,7 @@
                 format.
                 <button type="button" class="button" onclick="retrieve(2)">Submit</button>
             </form>
-            <p class="result" id="result2"></p>
+            <pre class="display" id="display2"></pre>
             <form style="margin-bottom:10px;">
                 Display only the close times in
                 <select name="datatype3" id="datatype3" required>
@@ -86,7 +96,7 @@
                 format.
                 <button type="button" class="button" onclick="retrieve(3)">Submit</button>
             </form>
-            <p class="result" id="result3"></p>
+            <pre class="display" id="display3"></pre>
             <form>
                 Display the top
                 <input type="text" size="3" id="top" required>
@@ -110,55 +120,76 @@
                 format.
                 <button type="button" class="button" onclick="retrieve(4)">Submit</button>
             </form>
-            <p class="option_format">- Type in a positive integer in the text box.</p>
-            <p class="option_format" style="color:red">
-                - Note: If the typed-in value is bigger than the total number of control times in the database,
-                it will have the same effect as clicking the list all
+            <p class="option_format" style="color:seagreen">
+                * Note: If the typed-in value in the textbox is larger than the total number of submitted control times,
+                it will list all the control times.
             </p>
-            <p class="result" id="result4"></p>
+            <pre class="display" id="display4"></pre>
             <script>
                 var SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
                 var LIST_ALL = SCRIPT_ROOT + "/listAll";
                 var LIST_OPEN = SCRIPT_ROOT + "/listOpenOnly";
                 var LIST_CLOSE = SCRIPT_ROOT + "/listCloseOnly";
 
+
                 function retrieve(option){
                     var datatype_id = "#datatype" + option;
-                    var result_id = "result" + option;
+                    var display_id = "display" + option;
+                    var datatype_val = $(datatype_id).val();
+                    var display = document.getElementById(display_id)
+                    var displaytype_val = $("#displaytype").val()
                     var top_k = $("#top").val();
+                    var error = false;
 
-                    if (option != "4" && top_k == "") {
-                        top_k = "0";
-                        alert(top_k);
-                    } else if (top_k == "" || parseInt(top_k) <= 0) {
-                        alert("Need to type in a positive integer in the textbox!");
-                    } else if (option == "4" && $("#displaytype").val() == null) {
+                    // Handling error cases for the last functionality.
+                    // Not typing in the posivie integer for top_k or not selecting option for display type
+                    if (option == "4") {
+                        if (error == false && (top_k == "" || parseInt(top_k) <= 0)) {
+                            error = true;
+                            alert("Need to type in a positive integer in the textbox!");
+                        }
+                        if (error == false && displaytype_val == null) {
+                            error = true;
+                            alert("Need to select one of the options!");
+                        }
+                    }
+                    else {
+                        // If top_k == 0, it will display all the rows in the collection of db
+                        // The first three functionalities will default top_k to 0.
+                        if (top_k == "") {
+                            top_k = "0";
+                        }
+
+                    }
+                    // Handling error case for not selecting option for data type
+                    if (error == false && datatype_val == null) {
+                        error = true;
                         alert("Need to select one of the options!");
-                    } else if ($(datatype_id).val() == null) {
-                        alert("Need to select one of the options!");
-                    } else {
-                        if (option == "1" || (option == "4" && $("#displaytype").val() == "both")) {
+                    }
+                    // If there's no error on typed in or selected values, get the data from api
+                    if (error == false) {
+                        if (option == "1" || (option == "4" && displaytype_val == "both")) {
                             $.getJSON(LIST_ALL, {top: top_k, datatype: $(datatype_id).val()}).done(
                                 function(data) {
-                                    document.getElementById(result_id).innerHTML = data.result;
+                                    display.innerHTML = data.result;
                                 }
                             ).fail(function(err){
                                 console.log("Error!");
                             });
                         }
-                        else if (option == "2" || (option == "4" && $("#displaytype").val() == "open")) {
-                            $.getJSON(LIST_ALL, {top: top_k, datatype: $(datatype_id).val()}).done(
+                        else if (option == "2" || (option == "4" && displaytype_val == "open")) {
+                            $.getJSON(LIST_OPEN, {top: top_k, datatype: $(datatype_id).val()}).done(
                                 function(data) {
-                                    document.getElementById(result_id).innerHTML = data.result;
+                                    display.innerHTML = data.result;
                                 }
                             ).fail(function(err){
                                 console.log("Error!");
                             });
                         }
-                        else if (option == "3" || (option == "4" && $("#displaytype").val() == "close")) {
-                            $.getJSON(LIST_ALL, {top: top_k, datatype: $(datatype_id).val()}).done(
+                        else if (option == "3" || (option == "4" && displaytype_val == "close")) {
+                            $.getJSON(LIST_CLOSE, {top: top_k, datatype: $(datatype_id).val()}).done(
                                 function(data) {
-                                    document.getElementById(result_id).innerHTML = data.result;
+                                    display.innerHTML = data.result;
                                 }
                             ).fail(function(err){
                                 console.log("Error!");
@@ -166,6 +197,7 @@
                         }
                     }
                 }
+
             </script>
         </div>
     </body>

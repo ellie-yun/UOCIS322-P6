@@ -18,36 +18,27 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
-@app.route("/listAll")
-def listall():
+@app.route("/<option>")
+def display(option):
     top = request.args.get("top", type=str)
     data_type = request.args.get("datatype", type=str)
-    url = 'http://' + os.environ['BACKEND_ADDR'] + ':' + os.environ['BACKEND_PORT'] + '/listAll'
+    if (option == "listAll"):
+        url = 'http://' + os.environ['BACKEND_ADDR'] + ':' + os.environ['BACKEND_PORT'] + '/listAll'
+    elif (option == "listOpenOnly"):
+        url = 'http://' + os.environ['BACKEND_ADDR'] + ':' + os.environ['BACKEND_PORT'] + '/listOpenOnly'
+    else:
+        url = 'http://' + os.environ['BACKEND_ADDR'] + ':' + os.environ['BACKEND_PORT'] + '/listCloseOnly'
     if data_type == "csv":
         url += '/csv'
     if int(top) > 0:
         url += '?top=' + top
-    app.logger.debug(requests.get(url).text)
     r = requests.get(url).text
+    if data_type == "csv":
+        r = r.replace('\\n', '<br/>')
+        r = r.replace('"', '')
+    app.logger.debug(r)
     return jsonify(result=r)
 
-""""@app.route("/insert", methods=["POST"])
-def submit():
-    data = request.form.to_dict()
-    # Converting string representation of list to a list
-    data['table'] = eval(data['table'])
-    table = data['table']
-    # Remove the previous submit result
-    db_client.delete_all_rows()
-
-    for i in range(len(table)):
-        row = table[str(i)]
-        for key, value in row.items():
-            if key == "km":
-                row[key] = int(value)
-        db_client.insert(row)
-    return flask.jsonify(output=str(data))
-"""
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
