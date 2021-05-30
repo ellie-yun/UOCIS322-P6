@@ -171,7 +171,12 @@
                         if (option == "1" || (option == "4" && displaytype_val == "both")) {
                             $.getJSON(LIST_ALL, {top: top_k, datatype: $(datatype_id).val()}).done(
                                 function(data) {
-                                    display.innerHTML = data.result;
+                                    if (data.result == "empty") {
+                                        alert("The database is empty. Please, submit the control time on the ACP calculator page.");
+                                    }
+                                    else {
+                                        display.innerHTML = data.result;
+                                    }
                                 }
                             ).fail(function(err){
                                 console.log("Error!");
@@ -180,7 +185,12 @@
                         else if (option == "2" || (option == "4" && displaytype_val == "open")) {
                             $.getJSON(LIST_OPEN, {top: top_k, datatype: $(datatype_id).val()}).done(
                                 function(data) {
-                                    display.innerHTML = data.result;
+                                    if (data.result == "empty") {
+                                        alert("The database is empty. Please, submit the control time on the ACP calculator page.");
+                                    }
+                                    else {
+                                        display.innerHTML = data.result;
+                                    }
                                 }
                             ).fail(function(err){
                                 console.log("Error!");
@@ -189,7 +199,12 @@
                         else if (option == "3" || (option == "4" && displaytype_val == "close")) {
                             $.getJSON(LIST_CLOSE, {top: top_k, datatype: $(datatype_id).val()}).done(
                                 function(data) {
-                                    display.innerHTML = data.result;
+                                    if (data.result == "empty") {
+                                        alert("The database is empty. Please, submit the control time on the ACP calculator page.");
+                                    }
+                                    else {
+                                        display.innerHTML = data.result;
+                                    }
                                 }
                             ).fail(function(err){
                                 console.log("Error!");

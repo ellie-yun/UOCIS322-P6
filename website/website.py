@@ -33,10 +33,11 @@ def display(option):
     if int(top) > 0:
         url += '?top=' + top
     r = requests.get(url).text
+    if r == '"The database is empty. Please, submit the control time."\n':
+        r = "empty"
     if data_type == "csv":
         r = r.replace('\\n', '<br/>')
         r = r.replace('"', '')
-    app.logger.debug(r)
     return jsonify(result=r)
 
 
