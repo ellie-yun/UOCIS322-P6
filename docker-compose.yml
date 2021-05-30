@@ -5,7 +5,7 @@ services:
         build: brevets/
         command: python -u flask_brevets.py
         ports:
-            - "6127:5000"
+            - "7127:5000"
         depends_on:
             - ourdb
         environment:
@@ -14,7 +14,7 @@ services:
         build: api/
         command: python -u api.py
         ports:
-            - "6227:5000"
+            - "7227:5000"
         depends_on:
             - ourdb
         environment:
@@ -23,7 +23,7 @@ services:
         build: website/
         command: python -u website.py
         ports:
-            - "6327:5000"
+            - "7327:5000"
         depends_on:
             - restapi
         environment:
